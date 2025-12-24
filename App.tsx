@@ -37,7 +37,7 @@ const App: React.FC = () => {
       setLoadingMore(true);
     } else {
       setLoading(true);
-      setMovies([]); // Clear immediately for visual feedback
+      setMovies([]);
       setPage(1);
     }
     
@@ -46,12 +46,11 @@ const App: React.FC = () => {
       
       if (response.movies.length === 0) {
         if (!isLoadMore) {
-          setError(`The archives for ${selectedYear} ${selectedGenre} films are currently unreachable or empty.`);
+          setError(`No titles matching your criteria were found in the archive.`);
         }
       } else {
         setMovies(prev => {
           if (!isLoadMore) return response.movies;
-          // Ensure uniqueness when appending
           const existingIds = new Set(prev.map(m => m.id));
           const uniqueNew = response.movies.filter(m => !existingIds.has(m.id));
           return [...prev, ...uniqueNew];
@@ -59,11 +58,11 @@ const App: React.FC = () => {
         if (isLoadMore) setPage(nextPage);
       }
     } catch (err: any) {
-      console.error(err);
+      console.error("App Fetch Error:", err);
       setError(
-        err?.message?.includes('API_KEY') 
-        ? "Missing API Key. Please add API_KEY to your environment variables." 
-        : "Archive synchronization failed. Please check your connection and refresh."
+        err.message?.includes('API_KEY') 
+        ? "API Configuration Missing: Please ensure 'API_KEY' is added to your Vercel Environment Variables." 
+        : "Failed to sync with the movie database. Please check your connection and try again."
       );
     } finally {
       setLoading(false);
@@ -161,22 +160,29 @@ const App: React.FC = () => {
           <LoadingSkeleton />
         ) : (
           <div className="pb-40">
-            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 transition-all duration-700 ${loading ? 'opacity-40 scale-[0.98] blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
-              {movies.map((movie, idx) => (
-                <MovieCard key={`${movie.id}-${idx}`} movie={movie} onClick={setActiveMovie} />
-              ))}
-              
-              {(loadingMore || (loading && movies.length > 0)) && (
-                <>
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={`more-${i}`} className="aspect-[2/3] bg-neutral-900 rounded-2xl animate-pulse flex flex-col items-center justify-center border border-white/5">
-                      <div className="w-10 h-10 border-2 border-white/10 border-t-cyan-500 rounded-full animate-spin" />
-                      <span className="mt-4 text-[8px] font-black text-neutral-600 uppercase tracking-widest">Scanning...</span>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
+            {movies.length > 0 ? (
+              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 transition-all duration-700 ${loading ? 'opacity-40 scale-[0.98] blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
+                {movies.map((movie, idx) => (
+                  <MovieCard key={`${movie.id}-${idx}`} movie={movie} onClick={setActiveMovie} />
+                ))}
+                
+                {(loadingMore || (loading && movies.length > 0)) && (
+                  <>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={`more-${i}`} className="aspect-[2/3] bg-neutral-900 rounded-2xl animate-pulse flex flex-col items-center justify-center border border-white/5">
+                        <div className="w-10 h-10 border-2 border-white/10 border-t-cyan-500 rounded-full animate-spin" />
+                        <span className="mt-4 text-[8px] font-black text-neutral-600 uppercase tracking-widest">Scanning...</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            ) : (
+               <div className="py-40 flex flex-col items-center opacity-20">
+                 <Film className="w-16 h-16 mb-4" />
+                 <p className="text-[10px] font-black uppercase tracking-[0.5em]">No Archive Data</p>
+               </div>
+            )}
 
             {movies.length > 0 && !loadingMore && !loading && (
               <div className="mt-24 flex flex-col items-center">
@@ -196,12 +202,10 @@ const App: React.FC = () => {
       {activeMovie && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl cursor-pointer" onClick={closeModal} />
-          
           <div className="relative w-full max-w-5xl max-h-full flex flex-col md:flex-row bg-[#080808] border border-white/10 rounded-[40px] overflow-hidden shadow-[0_0_150px_rgba(0,0,0,1)] animate-in zoom-in-95 duration-500">
             <div className={`relative flex-shrink-0 w-full md:w-[45%] lg:w-[42%] transition-all duration-700 ${showInfo ? 'opacity-20 blur-3xl scale-110' : 'opacity-100'}`}>
               <img src={activeMovie.posterUrl} alt={activeMovie.title} className="w-full h-full object-cover" />
             </div>
-
             <div className={`absolute inset-0 md:relative md:flex-grow flex flex-col p-8 md:p-16 transition-all duration-700 ${showInfo ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 md:opacity-100 md:translate-y-0 pointer-events-none md:pointer-events-auto'}`}>
               <div className="mb-auto overflow-y-auto max-h-[75vh] md:max-h-none scrollbar-hide">
                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[0.85] tracking-tighter mb-8 italic uppercase">
@@ -210,7 +214,6 @@ const App: React.FC = () => {
                  <p className="text-[10px] md:text-xs font-black text-cyan-500 uppercase tracking-[0.7em] mb-10">
                    {activeMovie.year} • {activeMovie.genre}
                  </p>
-                 
                  <div className="space-y-8">
                     <div className="p-8 md:p-10 bg-white/5 rounded-[32px] border border-white/5 backdrop-blur-md">
                        <h4 className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.5em] mb-6">Archive Summary</h4>
@@ -218,7 +221,6 @@ const App: React.FC = () => {
                          {activeMovie.description}
                        </p>
                     </div>
-                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <a href={`https://www.imdb.com/title/${activeMovie.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-6 bg-white rounded-2xl text-black transition-all hover:bg-cyan-400 active:scale-95 shadow-xl">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em]">IMDb Profile</span>
@@ -232,7 +234,6 @@ const App: React.FC = () => {
                  </div>
               </div>
             </div>
-
             <div className="absolute top-8 right-8 flex gap-4 z-[110]">
               <button onClick={() => setShowInfo(!showInfo)} className={`p-4 rounded-2xl border transition-all duration-300 ${showInfo ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}>
                 <Info className="w-6 h-6" />
@@ -252,15 +253,10 @@ const App: React.FC = () => {
               <span className="text-xl font-black tracking-tighter italic uppercase">CINETILE</span>
             </div>
             <p className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest text-center md:text-right">
-              Hybrid Discovery Engine • v2.0 Gemini Flash + OMDb Meta-Sync
+              Hybrid Discovery Engine • Gemini Flash + OMDb Meta-Sync
             </p>
         </div>
       </footer>
-
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };

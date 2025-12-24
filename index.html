@@ -7,6 +7,10 @@
   <title>CineTile - Discover Movies</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Shim for process.env to prevent crashes in Vite/browser environments
+    window.process = window.process || { env: {} };
+  </script>
   <style>
     body {
       font-family: 'Inter', sans-serif;

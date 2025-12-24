@@ -13,31 +13,34 @@ const omdbCache = new Map<string, Movie>();
 
 export class GeminiService {
   private static getClient() {
+    // Accessing process.env.API_KEY directly as required.
+    // The shim in index.html ensures this access doesn't throw a ReferenceError.
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey) {
+      console.error("CINETILE ERROR: API_KEY is missing from environment variables.");
+      return null;
+    }
+    
     try {
-      // In some browser environments, accessing process.env directly can throw.
-      // We wrap this to prevent a total app crash.
-      const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
-      if (!apiKey) {
-        console.warn("API_KEY not found in process.env");
-      }
-      return new GoogleGenAI({ apiKey: apiKey || '' });
+      return new GoogleGenAI({ apiKey });
     } catch (e) {
-      console.error("Critical: SDK Initialization failed. Environment might not support process.env.");
+      console.error("CINETILE ERROR: Failed to initialize GoogleGenAI client.", e);
       return null;
     }
   }
 
   static async getMovies(genre: string, year: string, page: number): Promise<MovieResponse> {
     const ai = this.getClient();
-    if (!ai) return { movies: [], sources: [] };
+    if (!ai) {
+      throw new Error("Discovery system offline. Check API Configuration.");
+    }
 
-    // We use a larger candidate pool (40) to ensure we always find 12 with posters.
-    // The prompt explicitly includes the page index to force result variety.
     const prompt = `Task: Provide a JSON array of exactly 40 unique IMDb IDs (starting with 'tt') for real movies.
     Target Genre: ${genre}
     Target Year: ${year}
     Page Index: ${page}
-    Constraint: Ensure these are different from the previous results. Focus on films with high-quality poster art available.
+    Constraint: Ensure high variety. Only return popular or well-reviewed films.
     Return ONLY the raw JSON array of strings.`;
 
     try {
@@ -64,13 +67,12 @@ export class GeminiService {
       
       if (!imdbIds || imdbIds.length === 0) return { movies: [], sources: [] };
 
-      // We use a shorter timeout (2500ms) for OMDb fetches to keep the app responsive.
       const movieDataPromises = imdbIds.map(async (id) => {
         if (omdbCache.has(id)) return omdbCache.get(id);
 
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2500);
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
 
           const res = await fetch(`https://www.omdbapi.com/?i=${id}&apikey=${OMDB_API_KEY}`, {
             signal: controller.signal
@@ -80,7 +82,6 @@ export class GeminiService {
           if (!res.ok) return null;
           const data = await res.json();
           
-          // Strict poster filtering: no poster = no entry
           const poster = data.Poster;
           if (data.Response !== "True" || !poster || poster === "N/A" || !poster.startsWith('http')) {
             return null;
@@ -103,16 +104,7 @@ export class GeminiService {
       });
 
       const allResults = await Promise.all(movieDataPromises);
-      
-      // Deduplicate by ID and filter nulls
-      const seen = new Set();
-      const uniqueMovies = allResults.filter(m => {
-        if (!m || seen.has(m.id)) return false;
-        seen.add(m.id);
-        return true;
-      }) as Movie[];
-      
-      // Aim for a full grid row (multiple of 6 or 4)
+      const uniqueMovies = Array.from(new Map(allResults.filter((m): m is Movie => m !== null).map(m => [m.id, m])).values());
       const movies = uniqueMovies.slice(0, 12);
 
       return {
@@ -123,7 +115,7 @@ export class GeminiService {
         ]
       };
     } catch (error) {
-      console.error("Discovery Engine Failure:", error);
+      console.error("CINETILE ERROR: Discovery Engine Failure:", error);
       throw error;
     }
   }
