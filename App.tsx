@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Film, ChevronDown, Loader2, Search, AlertCircle, RefreshCw, ExternalLink, Info, X, Play, Settings, Database } from 'lucide-react';
+import { Film, ChevronDown, Loader2, Search, AlertCircle, RefreshCw, ExternalLink, X, Play } from 'lucide-react';
 import { Movie, Genre, GENRES, YEARS } from './types';
 import { GeminiService } from './services/geminiService';
 import MovieCard from './components/MovieCard';
@@ -17,11 +16,9 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPreview, setIsPreview] = useState(false);
   
   const [activeMovie, setActiveMovie] = useState<Movie | null>(null);
   const [showInfo, setShowInfo] = useState(false);
-  const [showSetupGuide, setShowSetupGuide] = useState(false);
 
   const initialMount = useRef(true);
 
@@ -38,10 +35,9 @@ const App: React.FC = () => {
     
     try {
       const response = await GeminiService.getMovies(selectedGenre, selectedYear, nextPage);
-      setIsPreview(!!response.isPreview);
       
       if (response.movies.length === 0) {
-        if (!isLoadMore) setError("No data found for this period.");
+        if (!isLoadMore) setError("No data matching these criteria was found in the archive.");
       } else {
         setMovies(prev => {
           if (!isLoadMore) return response.movies;
@@ -52,7 +48,7 @@ const App: React.FC = () => {
         if (isLoadMore) setPage(nextPage);
       }
     } catch (err: any) {
-      setError(err.message || "Archive synchronization failed.");
+      setError("Failed to synchronize with the movie database. Please check your connection.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -76,14 +72,7 @@ const App: React.FC = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-900/10 rounded-full blur-[160px] opacity-30" />
       </div>
 
-      {isPreview && (
-        <div className="bg-cyan-500 text-black py-1 px-4 flex items-center justify-center gap-4 z-[100] sticky top-0">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Preview Mode Active: API_KEY Required for Real-Time Sync</span>
-          <button onClick={() => setShowSetupGuide(true)} className="text-[9px] font-black uppercase underline hover:opacity-70 transition-opacity">View Setup Guide</button>
-        </div>
-      )}
-
-      <header className={`sticky ${isPreview ? 'top-[24px]' : 'top-0'} z-50 bg-[#050505]/95 backdrop-blur-2xl border-b border-white/5 px-4 md:px-8 py-4 shadow-2xl`}>
+      <header className="sticky top-0 z-50 bg-[#050505]/95 backdrop-blur-2xl border-b border-white/5 px-4 md:px-8 py-4 shadow-2xl">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -135,16 +124,25 @@ const App: React.FC = () => {
           <LoadingSkeleton />
         ) : (
           <div className="pb-40">
-            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 transition-all duration-700 ${loading ? 'opacity-40 blur-sm' : 'opacity-100'}`}>
-              {movies.map((movie, idx) => <MovieCard key={`${movie.id}-${idx}`} movie={movie} onClick={setActiveMovie} />)}
-              {loadingMore && Array.from({ length: 6 }).map((_, i) => (
-                <div key={`more-${i}`} className="aspect-[2/3] bg-neutral-900 rounded-2xl animate-pulse border border-white/5 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-neutral-700" />
+            {movies.length > 0 ? (
+              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 transition-all duration-700 ${loading ? 'opacity-40 blur-sm' : 'opacity-100'}`}>
+                {movies.map((movie, idx) => <MovieCard key={`${movie.id}-${idx}`} movie={movie} onClick={setActiveMovie} />)}
+                {loadingMore && Array.from({ length: 6 }).map((_, i) => (
+                  <div key={`more-${i}`} className="aspect-[2/3] bg-neutral-900 rounded-2xl animate-pulse border border-white/5 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-neutral-700" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              !loading && (
+                <div className="py-40 flex flex-col items-center opacity-20">
+                  <Film className="w-16 h-16 mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em]">No Archive Data</p>
                 </div>
-              ))}
-            </div>
+              )
+            )}
 
-            {movies.length > 0 && !loadingMore && !loading && !isPreview && (
+            {movies.length > 0 && !loadingMore && !loading && (
               <div className="mt-24 flex flex-col items-center">
                 <button onClick={() => fetchMovies(true)} className="px-20 py-6 bg-white text-black font-black uppercase tracking-[0.5em] text-[10px] rounded-2xl transition-all hover:scale-[1.05] hover:bg-cyan-400 active:scale-95 shadow-2xl">
                    Expand Archive
@@ -155,49 +153,12 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Setup Guide Modal */}
-      {showSetupGuide && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowSetupGuide(false)} />
-          <div className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[32px] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-             <div className="flex items-center gap-4 mb-8">
-               <div className="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center border border-cyan-500/20">
-                 <Settings className="w-6 h-6 text-cyan-500" />
-               </div>
-               <h3 className="text-2xl font-black italic uppercase tracking-tighter">System Configuration</h3>
-             </div>
-             <div className="space-y-6">
-               <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
-                 <div className="flex items-center gap-3 mb-3">
-                   <Database className="w-4 h-4 text-cyan-500" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Environment Sync</span>
-                 </div>
-                 <p className="text-sm text-neutral-300 leading-relaxed">
-                   CineTile requires a valid <code className="text-cyan-500">API_KEY</code> from Google AI Studio to sync with the movie database in real-time.
-                 </p>
-               </div>
-               <div className="space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">How to Fix:</p>
-                  <ol className="text-sm text-neutral-400 space-y-3 list-decimal pl-4">
-                    <li>Open your <span className="text-white font-bold">Vercel Dashboard</span>.</li>
-                    <li>Go to <span className="text-white font-bold">Project Settings &gt; Environment Variables</span>.</li>
-                    <li>Add <code className="text-cyan-500 font-bold">API_KEY</code> as the name.</li>
-                    <li>Paste your Gemini API Key as the value.</li>
-                    <li><span className="text-white font-bold">Redeploy</span> your application.</li>
-                  </ol>
-               </div>
-               <button onClick={() => setShowSetupGuide(false)} className="w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-cyan-400 transition-all">Dismiss Diagnostics</button>
-             </div>
-          </div>
-        </div>
-      )}
-
       {/* Movie Details Modal */}
       {activeMovie && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl cursor-pointer" onClick={closeModal} />
           <div className="relative w-full max-w-5xl bg-[#080808] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in-95 duration-500">
-            <div className={`relative flex-shrink-0 w-full md:w-[45%] transition-all duration-700 ${showInfo ? 'opacity-20 blur-3xl scale-110' : 'opacity-100'}`}>
+            <div className="relative flex-shrink-0 w-full md:w-[45%]">
               <img src={activeMovie.posterUrl} alt={activeMovie.title} className="w-full h-full object-cover" />
             </div>
             <div className="relative flex-grow flex flex-col p-8 md:p-16">
@@ -226,7 +187,7 @@ const App: React.FC = () => {
               <Film className="w-6 h-6" />
               <span className="text-xl font-black tracking-tighter italic uppercase">CINETILE</span>
             </div>
-            <p className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">Hybrid Discovery Engine • v2.1 Stable</p>
+            <p className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">Hybrid Discovery Engine • Stable</p>
         </div>
       </footer>
     </div>
