@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Movie } from "../types";
 
@@ -14,8 +13,8 @@ const omdbCache = new Map<string, Movie>();
 export class GeminiService {
   private static getClient() {
     // Accessing process.env.API_KEY directly as required.
-    // The shim in index.html ensures this access doesn't throw a ReferenceError.
-    const apiKey = process.env.API_KEY;
+    // Ensure it's treated as a string even if the environment variable is missing.
+    const apiKey = process.env.API_KEY || '';
     
     if (!apiKey) {
       console.error("CINETILE ERROR: API_KEY is missing from environment variables.");
@@ -33,7 +32,7 @@ export class GeminiService {
   static async getMovies(genre: string, year: string, page: number): Promise<MovieResponse> {
     const ai = this.getClient();
     if (!ai) {
-      throw new Error("Discovery system offline. Check API Configuration.");
+      throw new Error("API_KEY missing. Please configure it in your Vercel Dashboard Environment Variables.");
     }
 
     const prompt = `Task: Provide a JSON array of exactly 40 unique IMDb IDs (starting with 'tt') for real movies.

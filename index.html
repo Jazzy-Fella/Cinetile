@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,13 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
-    // Shim for process.env to prevent crashes in Vite/browser environments
+    // Critical: Define process.env shim immediately to prevent ReferenceErrors
     window.process = window.process || { env: {} };
   </script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #0a0a0a;
+      background-color: #050505;
       color: #ffffff;
       margin: 0;
       overflow-x: hidden;
@@ -23,14 +22,14 @@
       width: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #111;
+      background: #0a0a0a;
     }
     ::-webkit-scrollbar-thumb {
-      background: #333;
+      background: #222;
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #444;
+      background: #333;
     }
   </style>
 <script type="importmap">
@@ -47,5 +46,7 @@
 </head>
 <body>
   <div id="root"></div>
+  <!-- Explicitly include entry point for Vite/Vercel production builds -->
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Film, ChevronDown, Loader2, Search, AlertCircle, RefreshCw, ExternalLink, Info, X, Play } from 'lucide-react';
 import { Movie, Genre, GENRES, YEARS } from './types';
@@ -9,7 +8,7 @@ import LoadingSkeleton from './components/LoadingSkeleton';
 const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const getRandomInitialYear = (): string => {
-  const min = 2005;
+  const min = 2010;
   const max = 2024;
   return (Math.floor(Math.random() * (max - min + 1)) + min).toString();
 };
@@ -58,12 +57,8 @@ const App: React.FC = () => {
         if (isLoadMore) setPage(nextPage);
       }
     } catch (err: any) {
-      console.error("App Fetch Error:", err);
-      setError(
-        err.message?.includes('API_KEY') 
-        ? "API Configuration Missing: Please ensure 'API_KEY' is added to your Vercel Environment Variables." 
-        : "Failed to sync with the movie database. Please check your connection and try again."
-      );
+      console.error("Discovery Sync Error:", err);
+      setError(err.message || "Failed to connect to the discovery archive.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -72,7 +67,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (initialMount.current) {
-      fetchMovies();
+      fetchMovies().catch(e => console.error("Initial load crash:", e));
       initialMount.current = false;
     }
   }, []);
@@ -178,10 +173,12 @@ const App: React.FC = () => {
                 )}
               </div>
             ) : (
-               <div className="py-40 flex flex-col items-center opacity-20">
-                 <Film className="w-16 h-16 mb-4" />
-                 <p className="text-[10px] font-black uppercase tracking-[0.5em]">No Archive Data</p>
-               </div>
+               !loading && (
+                 <div className="py-40 flex flex-col items-center opacity-20">
+                   <Film className="w-16 h-16 mb-4" />
+                   <p className="text-[10px] font-black uppercase tracking-[0.5em]">No Archive Data</p>
+                 </div>
+               )
             )}
 
             {movies.length > 0 && !loadingMore && !loading && (
