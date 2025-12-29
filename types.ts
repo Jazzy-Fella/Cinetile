@@ -10,9 +10,9 @@ export interface Movie {
   rating?: string | null;
 }
 
-export type Genre = 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy';
+export type Genre = 'All' | 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy';
 
-export const GENRE_MAP: Record<Genre, number> = {
+export const GENRE_MAP: Record<Exclude<Genre, 'All'>, number> = {
   'Action': 28,
   'Comedy': 35,
   'Drama': 18,
@@ -25,7 +25,7 @@ export const GENRE_MAP: Record<Genre, number> = {
   'Fantasy': 14
 };
 
-export const GENRES: Genre[] = Object.keys(GENRE_MAP) as Genre[];
+export const GENRES: Genre[] = ['All', ...Object.keys(GENRE_MAP) as Genre[]];
 
 const startYear = 1950;
 const endYear = 2024;

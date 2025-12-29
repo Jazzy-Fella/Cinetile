@@ -5,11 +5,15 @@ import { MovieService } from './services/movieService';
 import MovieCard from './components/MovieCard';
 import LoadingSkeleton from './components/LoadingSkeleton';
 
-const getRandomGenre = (): Genre => GENRES[Math.floor(Math.random() * GENRES.length)];
 const getRandomYear = (): string => {
-  const min = 2000;
-  const max = 2024;
+  const min = 1990;
+  const max = 2015;
   return (Math.floor(Math.random() * (max - min + 1)) + min).toString();
+};
+
+const getRandomGenre = (): Genre => {
+  const availableGenres = GENRES.filter(g => g !== 'All');
+  return availableGenres[Math.floor(Math.random() * availableGenres.length)];
 };
 
 const App = () => {
@@ -44,15 +48,10 @@ const App = () => {
         setMovies(prev => [...prev, ...response.movies]);
         setPage(targetPage);
       } else {
-        // Pick a "critically acclaimed" movie for the featured spot
-        // We pick the highest rated movie from the top 5 most popular ones
         if (response.movies.length > 0) {
-          const topCandidates = response.movies.slice(0, 5);
-          const best = topCandidates.reduce((prev, current) => 
-            (parseFloat(current.rating || '0') > parseFloat(prev.rating || '0')) ? current : prev
-          );
+          // In 'All' mode, the list is already sorted by rating, so we just take the top one
+          const best = response.movies[0];
           setFeaturedMovie(best);
-          // Filter out the featured movie from the grid results so it's not redundant
           setMovies(response.movies.filter(m => m.id !== best.id));
         } else {
           setFeaturedMovie(null);
@@ -230,7 +229,7 @@ const App = () => {
         )}
       </main>
 
-      {/* Modal remains the same */}
+      {/* Modal */}
       {activeMovie && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 md:p-12 lg:p-20">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={closeModal} />

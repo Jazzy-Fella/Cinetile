@@ -16,22 +16,31 @@ export class MovieService {
    */
   static async getMovies(selectedGenre: Genre, year: string, page: number = 1): Promise<MovieResponse> {
     try {
-      const genreId = GENRE_MAP[selectedGenre];
       const startDate = `${year}-01-01`;
       const endDate = `${year}-12-31`;
       
-      const params = new URLSearchParams({
+      const params: Record<string, string> = {
         api_key: TMDB_API_KEY,
-        with_genres: genreId.toString(),
         'primary_release_date.gte': startDate,
         'primary_release_date.lte': endDate,
-        sort_by: 'popularity.desc',
         include_adult: 'false',
         language: 'en-US',
         page: page.toString()
-      });
+      };
 
-      const url = `${BASE_URL}/discover/movie?${params.toString()}`;
+      if (selectedGenre === 'All') {
+        // When pulling all genres, we prioritize the highest rated movies
+        // We add a vote_count threshold to filter out movies with very few ratings
+        params.sort_by = 'vote_average.desc';
+        params['vote_count.gte'] = '500'; 
+      } else {
+        const genreId = GENRE_MAP[selectedGenre as Exclude<Genre, 'All'>];
+        params.with_genres = genreId.toString();
+        params.sort_by = 'popularity.desc';
+      }
+
+      const queryParams = new URLSearchParams(params);
+      const url = `${BASE_URL}/discover/movie?${queryParams.toString()}`;
       const response = await fetch(url);
       
       if (!response.ok) {
