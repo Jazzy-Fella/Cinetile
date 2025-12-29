@@ -2,7 +2,7 @@ import { Movie, Genre, GENRE_MAP } from "../types";
 
 const TMDB_API_KEY = "b14f24c2e189996413174a9e9d3fa115"; 
 const BASE_URL = "https://api.themoviedb.org/3";
-const IMAGE_BASE = "https://image.tmdb.org/t/p/original"; // Switched to original for large view
+const IMAGE_BASE = "https://image.tmdb.org/t/p/original"; 
 const THUMB_BASE = "https://image.tmdb.org/t/p/w500";
 
 export interface MovieResponse {
@@ -65,6 +65,7 @@ export class MovieService {
         description: item.overview || "No description provided.",
         posterUrl: `${IMAGE_BASE}${item.poster_path}`,
         thumbUrl: `${THUMB_BASE}${item.poster_path}`,
+        backdropUrl: item.backdrop_path ? `${IMAGE_BASE}${item.backdrop_path}` : undefined,
         rating: item.vote_average ? item.vote_average.toFixed(1) : null
       }));
   }

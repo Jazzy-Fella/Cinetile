@@ -1,4 +1,3 @@
-
 export interface Movie {
   id: string;
   title: string;
@@ -7,10 +6,11 @@ export interface Movie {
   description: string;
   posterUrl: string;
   thumbUrl: string;
+  backdropUrl?: string;
   rating?: string | null;
 }
 
-export type Genre = 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller';
+export type Genre = 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy';
 
 export const GENRE_MAP: Record<Genre, number> = {
   'Action': 28,
@@ -21,7 +21,8 @@ export const GENRE_MAP: Record<Genre, number> = {
   'Romance': 10749,
   'Animation': 16,
   'Documentary': 99,
-  'Thriller': 53
+  'Thriller': 53,
+  'Fantasy': 14
 };
 
 export const GENRES: Genre[] = Object.keys(GENRE_MAP) as Genre[];
