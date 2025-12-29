@@ -1,6 +1,13 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" fill="#050505"/>
-  <path d="M180 160C168.954 160 160 168.954 160 180V332C160 343.046 168.954 352 180 352H332C343.046 352 352 343.046 352 332V180C352 168.954 343.046 160 332 160H180Z" fill="white"/>
-  <path d="M210 210H302V240H210V210Z" fill="#050505"/>
-  <path d="M210 272H302V302H210V272Z" fill="#050505"/>
+  <path d="M140 160C140 137.909 157.909 120 180 120H332C354.091 120 372 137.909 372 160V352C372 374.091 354.091 392 332 392H180C157.909 392 140 374.091 140 352V160Z" fill="white"/>
+  <path d="M225 210L310 256L225 302V210Z" fill="#050505"/>
+  <rect x="100" y="160" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="100" y="210" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="100" y="260" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="100" y="310" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="397" y="160" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="397" y="210" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="397" y="260" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
+  <rect x="397" y="310" width="15" height="25" rx="2" fill="white" fill-opacity="0.3"/>
 </svg>
