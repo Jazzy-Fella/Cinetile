@@ -10,7 +10,7 @@ export interface Movie {
   rating?: string | null;
 }
 
-export type Genre = 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy';
+export type Genre = 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller';
 
 export const GENRE_MAP: Record<Genre, number> = {
   'Action': 28,
@@ -21,8 +21,7 @@ export const GENRE_MAP: Record<Genre, number> = {
   'Romance': 10749,
   'Animation': 16,
   'Documentary': 99,
-  'Thriller': 53,
-  'Fantasy': 14
+  'Thriller': 53
 };
 
 export const GENRES: Genre[] = Object.keys(GENRE_MAP) as Genre[];
