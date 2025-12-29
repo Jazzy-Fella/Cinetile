@@ -2,7 +2,7 @@
   "name": "CineTile",
   "short_name": "CineTile",
   "description": "Minimalist cinematic discovery tile grid.",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
@@ -15,7 +15,7 @@
       "purpose": "any"
     },
     {
-      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zW9nAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH6AMCFSAnmYy9swAAAmZJREFUeNrt3dtu20AQRdE6//9Lc9MCvYmRRMpLUnvS63mYmR6OInshsh+8P94/996/v+9/H8fP78fH/fXn/v59fL/f378vX7++Xl8vL9/v9/fvy9fPr9fXy8v3+339+Xv++vr7/vx+f93fj/vH/fXn7/lr6+9776f9/Xp/fb0f99f99edv6+vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/f8F397738f7188P78fH/fXn7/n9/699977X/9uP6P5E+O3AAAAAElFTkSuQmCC",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zW9nAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH6AMCFSAnmYy9swAAAmZJREFUeNrt3dtu20AQRdE6//9Lc9MCvYmRRMpLUnvS63mYmR6OInshsh+8P94/996/v+9/H8fP78fH/fXn/v59fL/f378vX7++Xl8vL9/v9/fvy9fPr9fXy8v3+339+Xv++vr7/vx+f93fj/vH/fXn7/lr6+9776f9/Xp/fb0f99f99edv6+vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/r69vN6f329H/fX/fXnb+vr28/r/fX1ftxf99efv62vbz+v99fV+3F/315+/ra9vP6/319f7cX/dX3/+tr6+/bzeX1/vx/11f/352/f8F397738f7188P78fH/fXn7/n9/699977X/9uP6P5E+O3AAAAAElFTkSuQmCC",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable"
