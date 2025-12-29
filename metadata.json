@@ -1,5 +1,5 @@
 {
   "name": "CineTile",
-  "description": "A sleek, minimalist movie discovery app that showcases films in a beautiful grid of posters, powered by Gemini 3 Flash with real-time search grounding.",
+  "description": "A sleek, minimalist movie discovery app that showcases films in a beautiful grid of posters, powered by a direct cinematic database.",
   "requestFramePermissions": []
 }
