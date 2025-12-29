@@ -4,6 +4,7 @@ const ASSETS = [
   '/index.html',
   '/index.tsx',
   '/logo.svg',
+  '/manifest.json',
   'https://cdn.tailwindcss.com'
 ];
 
