@@ -8,6 +8,7 @@
   <!-- PWA & Mobile Optimization -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#050505">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CineTile">
@@ -18,17 +19,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <script>
-    // Robust environment shim to prevent runtime ReferenceErrors
+    // Robust environment shim
     window.process = window.process || { env: {} };
     window.global = window;
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(registration => {
-          console.log('SW registered: ', registration);
-        }).catch(registrationError => {
-          console.log('SW registration failed: ', registrationError);
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          console.log('SW registered');
+        }).catch(err => {
+          console.log('SW registration failed', err);
         });
       });
     }
@@ -40,7 +41,6 @@
       color: #ffffff;
       margin: 0;
       overflow-x: hidden;
-      /* Add padding for iOS notched devices when in standalone mode */
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
