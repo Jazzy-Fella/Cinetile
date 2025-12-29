@@ -49,7 +49,6 @@ const App = () => {
         setPage(targetPage);
       } else {
         if (response.movies.length > 0) {
-          // In 'All' mode, the list is already sorted by rating, so we just take the top one
           const best = response.movies[0];
           setFeaturedMovie(best);
           setMovies(response.movies.filter(m => m.id !== best.id));
@@ -189,11 +188,21 @@ const App = () => {
                   </p>
 
                   <div className="flex items-center gap-4 animate-in slide-in-from-bottom-10 duration-1000">
-                    <button className="px-8 py-4 bg-white text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center gap-3 shadow-2xl transition-transform active:scale-95">
+                    <a 
+                      href={`https://web.stremio.com/#/search?search=${encodeURIComponent(featuredMovie.title)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-8 py-4 bg-white text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center gap-3 shadow-2xl transition-transform active:scale-95"
+                    >
                       <Play className="w-4 h-4 fill-black" /> Stream Now
-                    </button>
-                    <button className="p-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white hover:text-black transition-all">
-                      <Info className="w-5 h-5" />
+                    </a>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); openModal(featuredMovie); }}
+                      className="px-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white hover:text-black transition-all flex items-center gap-2"
+                    >
+                      <Info className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Info</span>
                     </button>
                   </div>
                 </div>
@@ -234,57 +243,67 @@ const App = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 md:p-12 lg:p-20">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={closeModal} />
           
-          <div className="relative w-full h-full max-w-6xl max-h-[90vh] overflow-hidden rounded-none sm:rounded-[32px] shadow-[0_0_80px_rgba(0,0,0,1)] flex items-center justify-center animate-in zoom-in-95 duration-300">
-            <img 
-              src={activeMovie.posterUrl} 
-              alt={activeMovie.title} 
-              className="w-full h-full object-contain z-10" 
-            />
-
-            <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2 z-40">
+          <div className="relative w-full h-full max-w-6xl max-h-[95vh] overflow-hidden rounded-none sm:rounded-[32px] shadow-[0_0_80px_rgba(0,0,0,1)] flex flex-col bg-[#050505] animate-in zoom-in-95 duration-300 border border-white/5">
+            {/* Header Controls */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2 z-50">
               <button 
                 onClick={() => setShowInfo(!showInfo)}
-                className={`p-3 rounded-xl border backdrop-blur-xl transition-all ${showInfo ? 'bg-white text-black border-white' : 'bg-black/50 text-white border-white/10'}`}
+                className={`px-4 py-2.5 rounded-xl border backdrop-blur-xl transition-all flex items-center gap-2 ${showInfo ? 'bg-white text-black border-white' : 'bg-black/50 text-white border-white/10'}`}
               >
-                <Info className="w-5 h-5" />
+                <Info className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Info</span>
               </button>
-              <button onClick={closeModal} className="p-3 bg-black/50 text-white rounded-xl border border-white/10 hover:bg-white hover:text-black transition-all backdrop-blur-xl">
+              <button onClick={closeModal} className="p-2.5 bg-black/50 text-white rounded-xl border border-white/10 hover:bg-white hover:text-black transition-all backdrop-blur-xl">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-2xl border-t border-white/10 p-6 md:p-10 transform transition-all duration-500 ease-out z-30 ${showInfo ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
-               <div className="max-w-2xl mx-auto">
-                 <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full flex items-center gap-2">
-                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="text-[10px] font-black text-yellow-500">{activeMovie.rating || 'N/A'}</span>
-                    </div>
-                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.4em]">{activeMovie.year}</span>
+            {/* Poster Main View */}
+            <div className="flex-1 relative w-full overflow-hidden flex items-center justify-center p-4">
+              <img 
+                src={activeMovie.posterUrl} 
+                alt={activeMovie.title} 
+                className="max-h-full max-w-full object-contain z-10 transition-transform duration-500" 
+              />
+
+              {/* Info Overlay inside the poster container */}
+              <div className={`absolute inset-0 z-30 bg-[#050505]/95 backdrop-blur-3xl p-8 md:p-16 flex items-center justify-center transform transition-all duration-500 ease-out ${showInfo ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+                 <div className="max-w-2xl w-full">
+                   <div className="flex items-center gap-4 mb-6">
+                      <div className="bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full flex items-center gap-2">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span className="text-[10px] font-black text-yellow-500">{activeMovie.rating || 'N/A'}</span>
+                      </div>
+                      <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.4em]">{activeMovie.year}</span>
+                   </div>
+                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter mb-6 italic uppercase">{activeMovie.title}</h2>
+                   <p className="text-neutral-400 text-sm md:text-lg leading-relaxed mb-10 font-light italic max-h-48 overflow-y-auto pr-4 custom-scrollbar">
+                      {activeMovie.description}
+                   </p>
+                   <div className="flex flex-col sm:flex-row gap-4">
+                      <a 
+                        href={`https://www.themoviedb.org/movie/${activeMovie.id}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex-1 flex items-center justify-center gap-3 p-4 bg-white/5 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                      >
+                        <ExternalLink className="w-4 h-4" /> View Details on TMDB
+                      </a>
+                   </div>
                  </div>
-                 <h2 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-4 italic uppercase">{activeMovie.title}</h2>
-                 <p className="text-neutral-400 text-sm md:text-base leading-relaxed mb-8 font-light italic max-h-32 overflow-y-auto pr-2">
-                    {activeMovie.description}
-                 </p>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <a 
-                      href={`https://web.stremio.com/#/search?search=${encodeURIComponent(activeMovie.title)}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center justify-center gap-3 p-4 bg-white text-black rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl"
-                    >
-                      <Play className="w-4 h-4 fill-black" /> Stream Now
-                    </a>
-                    <a 
-                      href={`https://www.themoviedb.org/movie/${activeMovie.id}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center justify-center gap-3 p-4 bg-white/5 border border-white/10 text-white rounded-lg font-black text-[10px] uppercase tracking-widest"
-                    >
-                      <ExternalLink className="w-4 h-4" /> View Details
-                    </a>
-                 </div>
-               </div>
+              </div>
+            </div>
+
+            {/* Persistent Stremio Footer */}
+            <div className="w-full bg-[#0a0a0a] border-t border-white/5 p-4 md:p-6 z-40 flex justify-center items-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+              <a 
+                href={`https://web.stremio.com/#/search?search=${encodeURIComponent(activeMovie.title)}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-full max-w-xs flex items-center justify-center gap-4 px-10 py-4 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all hover:scale-[1.02] active:scale-95"
+              >
+                <Play className="w-4 h-4 fill-black" /> Stremio
+              </a>
             </div>
           </div>
         </div>
