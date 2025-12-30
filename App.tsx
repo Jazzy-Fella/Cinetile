@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Film, ChevronDown, Loader2, Search, AlertCircle, ExternalLink, X, Star, Info, Play, Award, PlayCircle, Users, Clapperboard, ChevronUp } from 'lucide-react';
+import { Film, ChevronDown, Loader2, Search, AlertCircle, ExternalLink, X, Star, Info, Play, Award, PlayCircle, Users, Clapperboard } from 'lucide-react';
 import { Movie, Genre, GENRES, YEARS } from './types';
 import { MovieService } from './services/movieService';
 import MovieCard from './components/MovieCard';
@@ -64,8 +65,8 @@ const App = () => {
         setPage(targetPage);
       } else {
         if (response.movies.length > 0) {
+          // The first movie is now the highest rated via IMDb thanks to service-side ranking
           const best = response.movies[0];
-          // Pre-fetch trailer for featured to fix iOS sync issues
           const trailerKey = await MovieService.getTrailerKey(best.id);
           setFeaturedMovie({ ...best, trailerKey });
           setMovies(response.movies.filter(m => m.id !== best.id));
@@ -109,7 +110,6 @@ const App = () => {
     setDetailsLoading(true);
     
     try {
-      // Pre-fetching both to ensure they are ready for synchronous clicks later (iOS requirement)
       const [details, trailerKey] = await Promise.all([
         MovieService.getMovieDetails(movie.id),
         MovieService.getTrailerKey(movie.id)
@@ -122,18 +122,16 @@ const App = () => {
   };
 
   const handleOpenTrailer = (movie: Movie & { trailerKey?: string | null }) => {
-    // Synchronous opening to satisfy iOS popup blocker
     const url = movie.trailerKey 
       ? `https://www.youtube.com/watch?v=${movie.trailerKey}`
       : `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' official trailer')}`;
-    
     window.open(url, '_blank');
   };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-white/10 flex flex-col font-sans">
-      {/* Header (Static position, no longer floating) */}
-      <header className="relative bg-[#050505] border-b border-white/5 px-4 md:px-10 py-3">
+      {/* Header */}
+      <header className="relative bg-[#050505] border-b border-white/5 px-4 md:px-10 py-3 z-[60]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 bg-white text-black rounded flex items-center justify-center shadow-lg">
@@ -212,11 +210,11 @@ const App = () => {
                   <div className="flex items-center gap-3 mb-6">
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full flex items-center gap-2">
                       <Award className="w-3 h-3 text-yellow-500" />
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Featured</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Top Rated</span>
                     </div>
                     <div className="bg-yellow-500 text-black px-4 py-1.5 rounded-full flex items-center gap-2">
                       <Star className="w-3 h-3 fill-black" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{featuredMovie.rating}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{featuredMovie.rating} IMDb</span>
                     </div>
                   </div>
                   
@@ -259,7 +257,7 @@ const App = () => {
             {/* Grid */}
             <div className="max-w-7xl mx-auto px-4 md:px-10 pb-8 w-full">
               <div className="flex items-center justify-between mb-8 opacity-50">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em]">Browse {selectedGenre} • {selectedYear}</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em]">IMDb Ranked {selectedGenre} • {selectedYear}</h3>
                 <div className="h-[1px] flex-grow mx-8 bg-white/10" />
               </div>
 
@@ -291,7 +289,7 @@ const App = () => {
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={closeModal} />
           
           <div className="relative w-full h-full max-w-6xl max-h-[95vh] overflow-hidden rounded-none sm:rounded-[32px] shadow-2xl flex flex-col bg-[#050505] animate-in zoom-in-95 duration-300 border border-white/5">
-            {/* Header Controls (Positioned Above Content) */}
+            {/* Header Controls */}
             <div className="w-full flex items-center justify-end gap-2 p-4 md:p-6 z-[70] bg-[#050505]">
               <button 
                 onClick={() => setShowInfo(!showInfo)}
@@ -315,8 +313,6 @@ const App = () => {
 
               {/* Info Layer */}
               <div className={`absolute inset-0 z-30 overflow-hidden flex items-center justify-center transition-all duration-500 ease-in-out ${showInfo ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
-                 
-                 {/* CINEMATIC BACKDROP (Mood Light) */}
                  <div className="absolute inset-0 z-0 pointer-events-none">
                     <img 
                       src={activeMovie.backdropUrl || activeMovie.posterUrl} 
@@ -331,7 +327,7 @@ const App = () => {
                    <div className="flex items-center gap-4 mb-6">
                       <div className="bg-yellow-500 text-black px-3 py-1 rounded-lg flex items-center gap-2">
                         <Star className="w-3 h-3 fill-black" />
-                        <span className="text-[10px] font-black">{activeMovie.rating || 'N/A'}</span>
+                        <span className="text-[10px] font-black">{activeMovie.rating || 'N/A'} IMDb</span>
                       </div>
                       <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em]">{activeMovie.year}</span>
                    </div>
@@ -413,7 +409,7 @@ const App = () => {
       )}
 
       <footer className="py-12 text-center border-t border-white/5 bg-[#050505] z-10">
-        <p className="text-[8px] font-black uppercase tracking-[1.2em] opacity-30">CineTile Cinematic • Powered by TMDB</p>
+        <p className="text-[8px] font-black uppercase tracking-[1.2em] opacity-30">CineTile Cinematic • Powered by TMDB & OMDb</p>
       </footer>
     </div>
   );

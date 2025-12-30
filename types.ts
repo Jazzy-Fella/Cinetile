@@ -1,3 +1,4 @@
+
 export interface Movie {
   id: string;
   title: string;
@@ -8,6 +9,7 @@ export interface Movie {
   thumbUrl: string;
   backdropUrl?: string;
   rating?: string | null;
+  imdbVotes?: number;
   director?: string;
   cast?: string[];
   originalLanguage?: string;
