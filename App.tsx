@@ -310,7 +310,7 @@ const App = () => {
               <img 
                 src={activeMovie.posterUrl} 
                 alt={activeMovie.title} 
-                className={`max-h-full max-w-full object-contain z-10 transition-transform duration-700 ${showInfo ? 'scale-90 opacity-40 blur-sm' : 'scale-100 opacity-100'}`} 
+                className={`max-h-full max-w-full object-contain z-10 transition-transform duration-700 -translate-y-6 scale-[1.08] ${showInfo ? 'scale-90 opacity-40 blur-sm' : 'opacity-100'}`} 
               />
 
               {/* Info Layer */}
@@ -398,7 +398,7 @@ const App = () => {
             </div>
 
             {/* Stream Footer */}
-            <div className="w-full bg-[#0a0a0a] border-t border-white/5 p-5 z-[50] flex justify-center items-center">
+            <div className="w-full bg-[#0a0a0a] border-t border-white/5 pt-3 pb-7 px-5 z-[50] flex justify-center items-center">
               <a 
                 href={`https://web.stremio.com/#/search?search=${encodeURIComponent(activeMovie.title)}`} 
                 target="_blank" 
