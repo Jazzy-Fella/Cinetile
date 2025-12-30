@@ -132,8 +132,8 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-white/10 flex flex-col font-sans">
-      {/* Header */}
-      <header className="sticky top-0 z-[60] bg-[#050505]/95 backdrop-blur-2xl border-b border-white/5 px-4 md:px-10 py-3">
+      {/* Header (Static position, no longer floating) */}
+      <header className="relative bg-[#050505] border-b border-white/5 px-4 md:px-10 py-3">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 bg-white text-black rounded flex items-center justify-center shadow-lg">
