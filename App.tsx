@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Film, ChevronDown, Loader2, Search, AlertCircle, ExternalLink, X, Star, Info, Play, Award } from 'lucide-react';
+import { Film, ChevronDown, Loader2, Search, AlertCircle, ExternalLink, X, Star, Info, Play, Award, PlayCircle, Users, Clapperboard, ChevronUp } from 'lucide-react';
 import { Movie, Genre, GENRES, YEARS } from './types';
 import { MovieService } from './services/movieService';
 import MovieCard from './components/MovieCard';
@@ -16,6 +16,19 @@ const getRandomGenre = (): Genre => {
   return availableGenres[Math.floor(Math.random() * availableGenres.length)];
 };
 
+const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+};
+
 const App = () => {
   const [selectedGenre, setSelectedGenre] = useState<Genre>(getRandomGenre);
   const [selectedYear, setSelectedYear] = useState<string>(getRandomYear);
@@ -26,9 +39,12 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [trailerLoadingId, setTrailerLoadingId] = useState<string | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   
   const [activeMovie, setActiveMovie] = useState<Movie | null>(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [isCastExpanded, setIsCastExpanded] = useState(false);
 
   const initialMount = useRef(true);
 
@@ -82,11 +98,34 @@ const App = () => {
   const closeModal = () => {
     setActiveMovie(null);
     setShowInfo(false);
+    setIsCastExpanded(false);
   };
 
-  const openModal = (movie: Movie) => {
+  const openModal = async (movie: Movie) => {
     setActiveMovie(movie);
     setShowInfo(false);
+    setIsCastExpanded(false);
+    setDetailsLoading(true);
+    try {
+      const details = await MovieService.getMovieDetails(movie.id);
+      setActiveMovie(prev => prev && prev.id === movie.id ? { ...prev, ...details } : prev);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleWatchTrailer = async (movie: Movie) => {
+    setTrailerLoadingId(movie.id);
+    try {
+      const key = await MovieService.getTrailerKey(movie.id);
+      if (key && key.trim()) {
+        window.open(`https://www.youtube.com/watch?v=${key.trim()}`, '_blank');
+      } else {
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' official trailer')}`, '_blank');
+      }
+    } finally {
+      setTrailerLoadingId(null);
+    }
   };
 
   return (
@@ -187,7 +226,7 @@ const App = () => {
                     {featuredMovie.description}
                   </p>
 
-                  <div className="flex items-center gap-4 animate-in slide-in-from-bottom-10 duration-1000">
+                  <div className="flex flex-wrap items-center gap-4 animate-in slide-in-from-bottom-10 duration-1000">
                     <a 
                       href={`https://web.stremio.com/#/search?search=${encodeURIComponent(featuredMovie.title)}`}
                       target="_blank"
@@ -197,6 +236,18 @@ const App = () => {
                     >
                       <Play className="w-4 h-4 fill-black" /> Stream Now
                     </a>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleWatchTrailer(featuredMovie); }}
+                      disabled={trailerLoadingId === featuredMovie.id}
+                      className="px-6 py-4 bg-red-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center gap-3 shadow-2xl transition-all active:scale-95 hover:bg-red-700 disabled:opacity-80"
+                    >
+                      {trailerLoadingId === featuredMovie.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <PlayCircle className="w-4 h-4" />
+                      )}
+                      Trailer
+                    </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); openModal(featuredMovie); }}
                       className="px-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white hover:text-black transition-all flex items-center gap-2"
@@ -238,7 +289,7 @@ const App = () => {
         )}
       </main>
 
-      {/* Modal */}
+      {/* Movie Details Modal */}
       {activeMovie && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 md:p-12 lg:p-20">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={closeModal} />
@@ -276,18 +327,78 @@ const App = () => {
                       </div>
                       <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.4em]">{activeMovie.year}</span>
                    </div>
-                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter mb-6 italic uppercase">{activeMovie.title}</h2>
-                   <p className="text-neutral-400 text-sm md:text-lg leading-relaxed mb-10 font-light italic max-h-48 overflow-y-auto pr-4 custom-scrollbar">
+                   
+                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter mb-4 italic uppercase">{activeMovie.title}</h2>
+                   
+                   {/* Directed by & Starring section */}
+                   <div className="flex flex-col gap-3 mb-6">
+                      {detailsLoading ? (
+                        <div className="flex items-center gap-2 text-white/20">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span className="text-[8px] font-black uppercase tracking-[0.2em]">Loading Credits...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <Clapperboard className="w-4 h-4 text-neutral-500 mt-1 shrink-0" />
+                            <div className="flex flex-col">
+                              <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Directed by</span>
+                              <span className="text-sm font-medium text-white">{activeMovie.director || 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 group/cast">
+                            <Users className="w-4 h-4 text-neutral-500 mt-1 shrink-0" />
+                            <div className="flex flex-col w-full">
+                              <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Starring</span>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className={`text-sm font-medium text-white transition-all duration-300 ${!isCastExpanded ? 'line-clamp-1' : ''}`}>
+                                  {activeMovie.cast && activeMovie.cast.length > 0 
+                                    ? (isCastExpanded ? activeMovie.cast.join(', ') : activeMovie.cast.slice(0, 4).join(', ')) 
+                                    : 'N/A'}
+                                </span>
+                                {activeMovie.cast && activeMovie.cast.length > 4 && (
+                                  <button 
+                                    onClick={() => setIsCastExpanded(!isCastExpanded)}
+                                    className="text-[8px] font-black uppercase tracking-widest text-neutral-400 hover:text-white flex items-center gap-1 mt-0.5 transition-colors"
+                                  >
+                                    {isCastExpanded ? (
+                                      <>Show less <ChevronUp className="w-2 h-2" /></>
+                                    ) : (
+                                      <>+ {activeMovie.cast.length - 4} more</>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                   </div>
+
+                   <p className="text-neutral-400 text-sm md:text-lg leading-relaxed mb-10 font-light italic max-h-40 overflow-y-auto pr-4 custom-scrollbar">
                       {activeMovie.description}
                    </p>
-                   <div className="flex flex-col sm:flex-row gap-4">
+
+                   <div className="flex flex-col sm:flex-row gap-3">
+                      <button 
+                        onClick={() => handleWatchTrailer(activeMovie)}
+                        disabled={trailerLoadingId === activeMovie.id}
+                        className="flex-1 flex items-center justify-center gap-3 p-4 bg-red-600/10 border border-red-600/20 text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600/20 transition-all disabled:opacity-50"
+                      >
+                        {trailerLoadingId === activeMovie.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <PlayCircle className="w-4 h-4" />
+                        )}
+                        Trailer
+                      </button>
                       <a 
-                        href={`https://www.themoviedb.org/movie/${activeMovie.id}`} 
+                        href={`https://letterboxd.com/film/${slugify(activeMovie.title)}/`} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="flex-1 flex items-center justify-center gap-3 p-4 bg-white/5 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        className="flex-1 flex items-center justify-center gap-3 p-4 bg-white/5 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
                       >
-                        <ExternalLink className="w-4 h-4" /> View Details on TMDB
+                        <ExternalLink className="w-4 h-4" /> Letterboxd
                       </a>
                    </div>
                  </div>

@@ -8,9 +8,12 @@ export interface Movie {
   thumbUrl: string;
   backdropUrl?: string;
   rating?: string | null;
+  director?: string;
+  cast?: string[];
+  originalLanguage?: string;
 }
 
-export type Genre = 'All' | 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy';
+export type Genre = 'All' | 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy' | 'Family' | 'War' | 'Western';
 
 export const GENRE_MAP: Record<Exclude<Genre, 'All'>, number> = {
   'Action': 28,
@@ -22,7 +25,10 @@ export const GENRE_MAP: Record<Exclude<Genre, 'All'>, number> = {
   'Animation': 16,
   'Documentary': 99,
   'Thriller': 53,
-  'Fantasy': 14
+  'Fantasy': 14,
+  'Family': 10751,
+  'War': 10752,
+  'Western': 37
 };
 
 export const GENRES: Genre[] = ['All', ...Object.keys(GENRE_MAP) as Genre[]];
