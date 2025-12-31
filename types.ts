@@ -15,7 +15,7 @@ export interface Movie {
   originalLanguage?: string;
 }
 
-export type Genre = 'All' | 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Romance' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy' | 'Family' | 'War' | 'Western';
+export type Genre = 'All' | 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' | 'Animation' | 'Documentary' | 'Thriller' | 'Fantasy' | 'Family' | 'War' | 'Western';
 
 export const GENRE_MAP: Record<Exclude<Genre, 'All'>, number> = {
   'Action': 28,
@@ -23,7 +23,6 @@ export const GENRE_MAP: Record<Exclude<Genre, 'All'>, number> = {
   'Drama': 18,
   'Sci-Fi': 878,
   'Horror': 27,
-  'Romance': 10749,
   'Animation': 16,
   'Documentary': 99,
   'Thriller': 53,
