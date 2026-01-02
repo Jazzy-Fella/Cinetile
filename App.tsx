@@ -39,6 +39,7 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   
@@ -47,12 +48,17 @@ const App = () => {
   const [isCastExpanded, setIsCastExpanded] = useState(false);
 
   const initialMount = useRef(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const fetchMovies = useCallback(async (isLoadMore = false) => {
-    if (isLoadMore) setLoadingMore(true);
-    else {
+    if (isLoadMore) {
+      if (loadingMore) return;
+      setLoadingMore(true);
+    } else {
       setLoading(true);
       setError(null);
+      setHasMore(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
@@ -63,16 +69,24 @@ const App = () => {
       if (isLoadMore) {
         setMovies(prev => [...prev, ...response.movies]);
         setPage(targetPage);
+        // If we got fewer than 20 results (TMDB default page size) or hit total pages, stop
+        if (response.movies.length === 0 || targetPage >= response.totalPages) {
+          setHasMore(false);
+        }
       } else {
         if (response.movies.length > 0) {
-          // The first movie is now the highest rated via IMDb thanks to service-side ranking
           const best = response.movies[0];
           const trailerKey = await MovieService.getTrailerKey(best.id);
           setFeaturedMovie({ ...best, trailerKey });
           setMovies(response.movies.filter(m => m.id !== best.id));
+          
+          if (response.totalPages <= 1) {
+            setHasMore(false);
+          }
         } else {
           setFeaturedMovie(null);
           setMovies([]);
+          setHasMore(false);
         }
         setPage(1);
         if (response.movies.length === 0) {
@@ -86,7 +100,34 @@ const App = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [selectedGenre, selectedYear, page]);
+  }, [selectedGenre, selectedYear, page, loadingMore]);
+
+  // Handle intersection for infinite scroll
+  useEffect(() => {
+    if (loading || !hasMore) return;
+
+    const options = {
+      root: null,
+      rootMargin: '400px', // Fetch early before the user hits the exact bottom
+      threshold: 0
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loadingMore && hasMore) {
+        fetchMovies(true);
+      }
+    }, options);
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [fetchMovies, loading, loadingMore, hasMore]);
 
   useEffect(() => {
     if (initialMount.current) {
@@ -267,15 +308,20 @@ const App = () => {
                 ))}
               </div>
 
-              {!loading && movies.length > 0 && (
-                <div className="mt-20 pb-20 flex justify-center">
-                  <button 
-                    onClick={() => fetchMovies(true)}
-                    disabled={loadingMore}
-                    className="px-12 py-4 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all"
-                  >
-                    {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Load More Titles'}
-                  </button>
+              {/* Sentinel for Infinite Scroll */}
+              <div ref={sentinelRef} className="h-10 w-full" />
+
+              {/* Loader for Infinite Scroll */}
+              {loadingMore && (
+                <div className="mt-8 pb-20 flex justify-center items-center gap-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-white opacity-50" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-50">Loading more titles...</span>
+                </div>
+              )}
+
+              {!hasMore && movies.length > 0 && !loadingMore && (
+                <div className="mt-20 pb-20 flex justify-center opacity-20">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em]">End of Collection</span>
                 </div>
               )}
             </div>
