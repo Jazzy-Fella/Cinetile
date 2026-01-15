@@ -60,11 +60,11 @@ export class MovieService {
         const isActionGenre = selectedGenre === 'Action';
 
         if (isActionGenre) {
-          // ACTION GENRE: Cantonese (cn), Mandarin (zh), English (en), Italian (it), and French (fr)
-          return ['cn', 'zh', 'en', 'it', 'fr'].includes(lang);
+          // ACTION GENRE: Cantonese (cn), Mandarin (zh), English (en), and Italian (it)
+          return ['cn', 'zh', 'en', 'it'].includes(lang);
         } else {
-          // OTHER GENRES: ONLY English (en), Italian (it), and French (fr)
-          return ['en', 'it', 'fr'].includes(lang);
+          // OTHER GENRES: ONLY English (en) and Italian (it)
+          return ['en', 'it'].includes(lang);
         }
       });
 
